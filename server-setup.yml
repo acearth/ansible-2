@@ -30,6 +30,7 @@
       with_items:
         - psycopg2-binary
         - docker-compose
+        - awscli
 
     - name: "Find out if PostgreSQL is initialized"
       ansible.builtin.stat:
