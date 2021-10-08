@@ -1,0 +1,31 @@
+- hosts: aws
+  become: true
+  vars_files:
+    - vars/common.yml
+    - vars/secrets.yml
+
+  tasks:
+    - name: ecr docker get-authorization-token
+      shell: "AWS_ACCESS_KEY_ID={{aws_access_key_id}} AWS_SECRET_ACCESS_KEY={{aws_secret_access_key}} aws ecr get-authorization-token --region {{aws_region}}"
+      register: ecr_command
+  
+    - set_fact:
+        ecr_authorization_data: "{{ (ecr_command.stdout | from_json).authorizationData[0] }}"
+    
+    - set_fact:
+        ecr_credentials: "{{ (ecr_authorization_data.authorizationToken | b64decode).split(':') }}"
+    
+    - name: docker_repository - Log into ECR registry and force re-authorization
+      docker_login:
+        registry_url: "{{ ecr_authorization_data.proxyEndpoint.rpartition('//')[2] }}"
+        username: "{{ ecr_credentials[0] }}"
+        password: "{{ ecr_credentials[1] }}"
+        reauthorize: yes
+
+    - name: Create/Update the math-power app container if needed
+      docker_container:
+        name: math_power_app
+        image: "{{aws_account}}.dkr.ecr.ap-northeast-1.amazonaws.com/math_power"
+        pull: true
+        state: started
+        network_mode: host
