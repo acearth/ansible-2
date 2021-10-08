@@ -1,6 +1,6 @@
 - hosts: aws
   vars_files:
-    - ansible-vars.yml
+    - vars/common.yml
   tasks:
     - name: "Set timestamp of the backup"
       set_fact:

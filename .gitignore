@@ -1,1 +1,2 @@
 backups-db-*.dump.gz
+vars/secrets.yml
