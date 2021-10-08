@@ -1,0 +1,22 @@
+- hosts: aws
+  vars_files:
+    - ansible-vars.yml
+  tasks:
+    - name: "Set timestamp of the backup"
+      set_fact:
+        now: "{{ lookup(\"pipe\", \"date +%F-%T\") }}"
+
+
+    - name: "Back up the database"
+      postgresql_db:
+        state: dump
+        name: "{{ db_name }}"
+        target: "/tmp/{{ app_name }}-backups-{{ now }}-{{ db_name }}.dump.gz"
+      become: yes
+      become_user: postgres
+
+    - name: "Fetch backup from the server"
+      fetch:
+        src: "/tmp/{{ app_name }}-backups-{{ now }}-{{ db_name }}.dump.gz"
+        dest: "backups-db-{{ now }}-{{ db_name }}.dump.gz"
+        flat: yes
