@@ -22,3 +22,8 @@ Host tfm
 - API deployment with docker private registry (AWS ECR);
 - Database setup (postgresql);
 - Database backup
+
+# NOTE
+About configure web server to point to API service, this is not specifically implemented, since may `docker run math_power` is enough. Note the docker image already declared to use port 3000.  Or maybe I misunderstood the requirement.
+
+On that step maybe I need to introduce nginx here for port forwarding.
